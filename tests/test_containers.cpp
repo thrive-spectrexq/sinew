@@ -97,6 +97,15 @@ TEST_CASE(TestStaticStringBasic) {
     REQUIRE(str.append(" world"));
     REQUIRE_EQ(str.view(), "hello world");
     REQUIRE_EQ(str.size(), 11u);
+    REQUIRE_EQ(str.front(), 'h');
+    REQUIRE_EQ(str.back(), 'd');
+
+    // Test range-based for loop over StaticString
+    std::string accumulated;
+    for (char c : str) {
+        accumulated += c;
+    }
+    REQUIRE_EQ(accumulated, "hello world");
 
     // Test truncation on overflow
     sinew::StaticString<5> small_str("1234567890");

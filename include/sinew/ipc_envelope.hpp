@@ -265,6 +265,21 @@ public:
     }
 
     /**
+     * @brief Type-safe message consumer callback. If the current packet matches Msg,
+     * invokes callback and commits read cursor automatically.
+     */
+    template <typename Msg, typename Func>
+    bool consume(Func&& func, bool verify_crc = false) {
+        const Msg* msg = peek_msg<Msg>(verify_crc);
+        if (msg == nullptr) {
+            return false;
+        }
+        func(*msg);
+        commit_read();
+        return true;
+    }
+
+    /**
      * @brief Advance the read cursor.
      */
     void commit_read() noexcept {

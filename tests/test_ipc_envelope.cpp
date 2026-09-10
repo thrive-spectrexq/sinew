@@ -90,6 +90,16 @@ TEST_CASE(TestIpcEnvelopeBasic) {
     REQUIRE((bus_consumer.dispatch_and_commit<Heartbeat, JointCommand, DiagnosticAlert>(visitor)));
     REQUIRE_EQ(alert_count, 1);
     REQUIRE(bus_consumer.empty());
+
+    // Test typed consume() on IpcEnvelopeRingBuffer
+    REQUIRE(bus_producer.push(hb));
+    bool consumed_hb = false;
+    REQUIRE(bus_consumer.consume<Heartbeat>([&](const Heartbeat& h) {
+        consumed_hb = true;
+        REQUIRE_EQ(h.uptime_ms, 5000u);
+    }));
+    REQUIRE(consumed_hb);
+    REQUIRE(bus_consumer.empty());
 }
 
 TEST_CASE(TestIpcEnvelopeConcurrentMixedStream) {

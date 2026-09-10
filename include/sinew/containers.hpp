@@ -162,7 +162,15 @@ class StaticString {
     static_assert(Capacity > 0, "StaticString capacity must be greater than zero");
 
 public:
+    using value_type = char;
     using size_type = uint32_t;
+    using difference_type = std::ptrdiff_t;
+    using reference = char&;
+    using const_reference = const char&;
+    using pointer = char*;
+    using const_pointer = const char*;
+    using iterator = char*;
+    using const_iterator = const char*;
 
     char data_[Capacity + 1]{};
     uint32_t size_{0};
@@ -210,6 +218,20 @@ public:
     constexpr const char* c_str() const noexcept { return data_; }
     constexpr const char* data() const noexcept { return data_; }
     constexpr char* data() noexcept { return data_; }
+
+    constexpr char& front() noexcept { return data_[0]; }
+    constexpr const char& front() const noexcept { return data_[0]; }
+
+    constexpr char& back() noexcept { return data_[size_ > 0 ? size_ - 1 : 0]; }
+    constexpr const char& back() const noexcept { return data_[size_ > 0 ? size_ - 1 : 0]; }
+
+    constexpr iterator begin() noexcept { return data_; }
+    constexpr const_iterator begin() const noexcept { return data_; }
+    constexpr const_iterator cbegin() const noexcept { return data_; }
+
+    constexpr iterator end() noexcept { return data_ + size_; }
+    constexpr const_iterator end() const noexcept { return data_ + size_; }
+    constexpr const_iterator cend() const noexcept { return data_ + size_; }
 
     constexpr std::string_view view() const noexcept {
         return std::string_view(data_, size_);

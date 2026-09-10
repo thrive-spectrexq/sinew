@@ -9,6 +9,7 @@ add_executable(sinew_tests
     test_ipc_ring_buffer.cpp
     test_ipc_envelope.cpp
     test_portable.cpp
+    test_ros2_bridge.cpp
 )
 
 target_link_libraries(sinew_tests PRIVATE sinew::sinew)

@@ -119,7 +119,7 @@ Planned early milestones:
 - [x] Portable (endianness-normalized) encode path (`sinew::portable_encode`/`portable_decode`)
 - [x] Benchmark suite vs FlatBuffers/Cap'n Proto/SBE on representative telemetry payloads
 - [x] MCU target validation (Cortex-M4/M7 freestanding / no-heap / no-exceptions)
-- [ ] Optional ROS 2 bridge for interop with existing robotics stacks
+- [x] Optional ROS 2 bridge for interop with existing robotics stacks (`sinew::ros2::BridgePublisher`/`BridgeSubscriber`)
 
 ## Design non-goals
 

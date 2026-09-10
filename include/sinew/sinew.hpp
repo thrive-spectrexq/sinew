@@ -12,6 +12,7 @@
 #include <sinew/ipc_ring_buffer.hpp>
 #include <sinew/ipc_envelope.hpp>
 #include <sinew/portable.hpp>
+#include <sinew/ros2_bridge.hpp>
 
 // High-level macro for defining standard Sinew messages
 #define SINEW_MESSAGE(Name, ...) \

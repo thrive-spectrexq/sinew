@@ -18,8 +18,13 @@ namespace sinew {
 namespace ros2 {
 
 /**
- * @brief Standardized POD representations of common ROS 2 message types
- * used for zero-copy bridging and conversion without requiring ROS 2 headers.
+ * @brief Standardized POD representations of common ROS 2 message types,
+ * bidirectional converter traits, and zero-allocation ring-buffer worker threads
+ * (BridgePublisher, BridgeSubscriber).
+ *
+ * NOTE: This header provides zero-copy bridging schemas and worker loops designed
+ * to interface Sinew high-frequency telemetry loops with ROS 2 subscriber/publisher
+ * callbacks without pulling heavy ROS 2 dependencies into embedded cores.
  */
 
 struct Vector3 {
@@ -70,13 +75,12 @@ struct JointStateMessage {
  */
 template <typename SinewMsg, typename RosMsg>
 struct Ros2Converter {
-    // Default fallback uses explicit assignment if types match
-    static void to_ros(const SinewMsg& in, RosMsg& out) {
-        out = in;
-    }
-    static void from_ros(const RosMsg& in, SinewMsg& out) {
-        out = in;
-    }
+    static_assert(sizeof(SinewMsg) == 0,
+        "sinew::ros2::Ros2Converter must be specialized for the specific SinewMsg and RosMsg types. "
+        "Provide explicit to_ros() and from_ros() specializations.");
+
+    static void to_ros(const SinewMsg&, RosMsg&) = delete;
+    static void from_ros(const RosMsg&, SinewMsg&) = delete;
 };
 
 /**

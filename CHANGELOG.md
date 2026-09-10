@@ -17,11 +17,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **PacketView Direct Dispatch**: Added `dispatch<MsgTypes...>(const PacketView&, Visitor&&, bool)` in `include/sinew/dispatch.hpp` allowing pattern matching directly from pre-inspected wire packets without pointer offset recalculation.
 - **Ring Buffer Consumer Callbacks**: Added `consume(Func&&)` method to `SpscRingBuffer` and `IpcRingBuffer`, allowing in-place processing with zero copy and automatic commit.
 - **StaticContainer Bounds Checking & Resizing**: Added `at(index)` and `resize(size, val)` to `StaticVector` and `at(index)` to `StaticString` with conditional exception support (`SINEW_NO_EXCEPTIONS`).
+- **Write-Side Typed Error Reporting (`PrepareResult<T>` & `prepare_result<T>()`)**: Added `PrepareResult<T>` and `prepare_result<T>(buffer, capacity)` to `include/sinew/wire.hpp` providing structured error feedback (`ErrorCode::BufferTooSmall`, `ErrorCode::Misaligned`) during in-place serialization.
+- **Freestanding Debug Traps & Annotations**: Added debug assertions (`assert(index < size_)`) and safety documentation to `StaticVector::at()` and `StaticString::at()` for `-fno-exceptions` embedded MCU targets.
 - **StaticString STL Iterators & Element Accessors**: Added `begin()`, `end()`, `cbegin()`, `cend()`, `front()`, and `back()` to `StaticString` enabling standard range-based `for` loops, algorithms, and container uniformity.
 - **IPC Envelope Typed Consumer Callback**: Added `consume<Msg>(Func&&, bool)` to `IpcEnvelopeRingBuffer` for safe single-type message consumption with automatic cursor advancement.
 - **Freestanding IOStream Guarding**: Guarded `operator<<` overloads with `#if !defined(SINEW_NO_IOSTREAMS)` across headers and configured the embedded `mcu_freestanding` build with zero exception unwinding warnings.
 
 ### Changed
+- **Loud Compile Failure for Unspecialized ROS 2 Converters**: Replaced generic fallback assignment in `sinew::ros2::Ros2Converter` with `static_assert(sizeof(SinewMsg) == 0)` and deleted methods to trigger clear, immediate compile-time errors when a specialization is omitted.
 - **POSIX Shared Memory Name Clamping**: Enforced POSIX/macOS compliance in `SharedMemoryRegion` by normalizing names with a leading slash and clamping to 31 bytes (macOS `PSHMNAMELENGTH` limit), eliminating `ENAMETOOLONG` errors.
 - **Zeroed Padding in prepare<T>()**: prepare<T>() now executes std::memset across the payload memory before placement-new, eliminating non-deterministic alignment padding bytes and ensuring reproducible CRC32 checksums.
 - **Strict ID Validation**: Removed the wildcard ID check (xpected_id != 0) from alidate<T>() and portable_decode(), enforcing exact message ID matching across all decodes.

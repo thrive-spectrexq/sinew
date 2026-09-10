@@ -189,3 +189,39 @@ TEST_CASE(TestViewResult) {
     REQUIRE(res_short.value == nullptr);
 }
 
+TEST_CASE(TestPrepareResult) {
+    uint8_t wire_buffer[sinew::message_size<TestTelemetry>()];
+
+    // 1. Successful prepare_result
+    auto res = sinew::prepare_result<TestTelemetry>(wire_buffer, sizeof(wire_buffer));
+    REQUIRE(res.ok());
+    REQUIRE(res.has_value());
+    REQUIRE_EQ(res.error, sinew::ErrorCode::Ok);
+    REQUIRE(res.value != nullptr);
+
+    // Operator* and operator-> ergonomics
+    res->timestamp_ns = 9999;
+    REQUIRE_EQ((*res).timestamp_ns, 9999ULL);
+
+    // 2. Buffer too small
+    auto res_small = sinew::prepare_result<TestTelemetry>(wire_buffer, sizeof(wire_buffer) - 1);
+    REQUIRE(!res_small.ok());
+    REQUIRE_EQ(res_small.error, sinew::ErrorCode::BufferTooSmall);
+    REQUIRE(res_small.value == nullptr);
+
+    // 3. Null buffer
+    auto res_null = sinew::prepare_result<TestTelemetry>(nullptr, sizeof(wire_buffer));
+    REQUIRE(!res_null.ok());
+    REQUIRE_EQ(res_null.error, sinew::ErrorCode::BufferTooSmall);
+    REQUIRE(res_null.value == nullptr);
+
+    // 4. Misaligned buffer
+    alignas(16) uint8_t aligned_buf[sinew::message_size<TestTelemetry>() + 16];
+    // Offset by 1 byte so that payload (offset by 16 bytes) is misaligned for alignof(TestTelemetry) (which is 8)
+    uint8_t* misaligned_ptr = aligned_buf + 1;
+    auto res_misalign = sinew::prepare_result<TestTelemetry>(misaligned_ptr, sizeof(aligned_buf) - 1);
+    REQUIRE(!res_misalign.ok());
+    REQUIRE_EQ(res_misalign.error, sinew::ErrorCode::Misaligned);
+    REQUIRE(res_misalign.value == nullptr);
+}
+

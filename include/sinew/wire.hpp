@@ -104,18 +104,32 @@ inline const T* view(const uint8_t (&buffer)[N], BoolType verify_crc) noexcept {
 }
 
 template <typename T>
-inline T* prepare(void* buffer, size_t capacity) noexcept {
+struct PrepareResult {
+    T* value{nullptr};
+    ErrorCode error{ErrorCode::Ok};
+
+    constexpr bool ok() const noexcept { return error == ErrorCode::Ok && value != nullptr; }
+    constexpr bool has_value() const noexcept { return value != nullptr; }
+    constexpr explicit operator bool() const noexcept { return ok(); }
+    constexpr T* operator->() noexcept { return value; }
+    constexpr const T* operator->() const noexcept { return value; }
+    constexpr T& operator*() noexcept { return *value; }
+    constexpr const T& operator*() const noexcept { return *value; }
+};
+
+template <typename T>
+inline PrepareResult<T> prepare_result(void* buffer, size_t capacity) noexcept {
     check_message_type_constraints<T>();
 
     if (buffer == nullptr || capacity < sizeof(Header) + sizeof(T)) {
-        return nullptr;
+        return PrepareResult<T>{nullptr, ErrorCode::BufferTooSmall};
     }
 
     auto* byte_ptr = static_cast<uint8_t*>(buffer);
     auto* payload_ptr = byte_ptr + sizeof(Header);
 
     if (reinterpret_cast<uintptr_t>(payload_ptr) % alignof(T) != 0) {
-        return nullptr;
+        return PrepareResult<T>{nullptr, ErrorCode::Misaligned};
     }
 
     auto* hdr = reinterpret_cast<Header*>(buffer);
@@ -128,7 +142,18 @@ inline T* prepare(void* buffer, size_t capacity) noexcept {
     // Explicitly zero the payload memory to guarantee all inter-field alignment padding
     // bytes are deterministic for reproducible CRC32 checksums.
     std::memset(payload_ptr, 0, sizeof(T));
-    return new (payload_ptr) T;
+    T* constructed = new (payload_ptr) T;
+    return PrepareResult<T>{constructed, ErrorCode::Ok};
+}
+
+template <typename T, size_t N>
+inline PrepareResult<T> prepare_result(uint8_t (&buffer)[N]) noexcept {
+    return prepare_result<T>(static_cast<void*>(buffer), N);
+}
+
+template <typename T>
+inline T* prepare(void* buffer, size_t capacity) noexcept {
+    return prepare_result<T>(buffer, capacity).value;
 }
 
 template <typename T, size_t N>

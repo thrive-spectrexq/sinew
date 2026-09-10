@@ -16,6 +16,7 @@
 #include <stdexcept>
 #else
 #define SINEW_HAS_EXCEPTIONS 0
+#include <cassert>
 #endif
 
 namespace sinew {
@@ -105,6 +106,10 @@ public:
 #if SINEW_HAS_EXCEPTIONS
             throw std::out_of_range("StaticVector::at() index out of range");
 #else
+            // FREESTANDING SAFETY NOTE: When compiled without C++ exceptions (-fno-exceptions / MCU targets),
+            // throwing std::out_of_range is unavailable. In debug mode, an assertion is fired.
+            // In release mode, element 0 is returned as a fallback to avoid undefined memory access.
+            assert(index < size_ && "StaticVector::at() index out of range");
             return data_[0];
 #endif
         }
@@ -116,6 +121,10 @@ public:
 #if SINEW_HAS_EXCEPTIONS
             throw std::out_of_range("StaticVector::at() index out of range");
 #else
+            // FREESTANDING SAFETY NOTE: When compiled without C++ exceptions (-fno-exceptions / MCU targets),
+            // throwing std::out_of_range is unavailable. In debug mode, an assertion is fired.
+            // In release mode, element 0 is returned as a fallback to avoid undefined memory access.
+            assert(index < size_ && "StaticVector::at() index out of range");
             return data_[0];
 #endif
         }
@@ -270,6 +279,10 @@ public:
 #if SINEW_HAS_EXCEPTIONS
             throw std::out_of_range("StaticString::at() index out of range");
 #else
+            // FREESTANDING SAFETY NOTE: When compiled without C++ exceptions (-fno-exceptions / MCU targets),
+            // throwing std::out_of_range is unavailable. In debug mode, an assertion is fired.
+            // In release mode, element 0 is returned as a fallback to avoid undefined memory access.
+            assert(index < size_ && "StaticString::at() index out of range");
             return data_[0];
 #endif
         }
@@ -281,6 +294,10 @@ public:
 #if SINEW_HAS_EXCEPTIONS
             throw std::out_of_range("StaticString::at() index out of range");
 #else
+            // FREESTANDING SAFETY NOTE: When compiled without C++ exceptions (-fno-exceptions / MCU targets),
+            // throwing std::out_of_range is unavailable. In debug mode, an assertion is fired.
+            // In release mode, element 0 is returned as a fallback to avoid undefined memory access.
+            assert(index < size_ && "StaticString::at() index out of range");
             return data_[0];
 #endif
         }

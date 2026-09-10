@@ -117,8 +117,8 @@ Planned early milestones:
 - [x] Heterogeneous message stream inspect and visitor dispatch (`sinew::dispatch`)
 - [x] Heterogeneous IPC shared-memory bus (`sinew::IpcEnvelopeRingBuffer`)
 - [x] Portable (endianness-normalized) encode path (`sinew::portable_encode`/`portable_decode`)
-- [ ] Benchmark suite vs FlatBuffers/Cap'n Proto/SBE on representative telemetry payloads
-- [ ] MCU target validation (Cortex-M4/M7)
+- [x] Benchmark suite vs FlatBuffers/Cap'n Proto/SBE on representative telemetry payloads
+- [x] MCU target validation (Cortex-M4/M7 freestanding / no-heap / no-exceptions)
 - [ ] Optional ROS 2 bridge for interop with existing robotics stacks
 
 ## Design non-goals

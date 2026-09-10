@@ -3,7 +3,9 @@
 #include <cstdint>
 #include <cstddef>
 #include <string_view>
+#if !defined(SINEW_NO_IOSTREAMS)
 #include <ostream>
+#endif
 
 namespace sinew {
 
@@ -46,8 +48,10 @@ constexpr std::string_view error_string(ErrorCode code) noexcept {
     }
 }
 
+#if !defined(SINEW_NO_IOSTREAMS)
 inline std::ostream& operator<<(std::ostream& os, ErrorCode code) {
     return os << error_string(code);
 }
+#endif
 
 } // namespace sinew

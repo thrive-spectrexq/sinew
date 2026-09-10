@@ -55,15 +55,16 @@ jobs:
           fi
 
       - name: Configure CMake
+        shell: bash
         env:
           CXX: ${{ matrix.cxx }}
         run: |
           BUILD_TYPE=${{ matrix.build_type || 'Release' }}
           EXTRA_FLAGS=""
           if [ "${{ matrix.sanitizers }}" = "true" ]; then
-            EXTRA_FLAGS="-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -g -O1"
+            EXTRA_FLAGS="-DCMAKE_CXX_FLAGS=\"-fsanitize=address,undefined -g -O1\""
           fi
-          cmake -B build \
+          eval cmake -B build \
             -DCMAKE_CXX_STANDARD=${{ matrix.std }} \
             -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
             $EXTRA_FLAGS \
@@ -72,20 +73,24 @@ jobs:
             -DSINEW_BUILD_BENCHMARKS=ON
 
       - name: Build
+        shell: bash
         run: |
           BUILD_TYPE=${{ matrix.build_type || 'Release' }}
           cmake --build build --config $BUILD_TYPE
 
       - name: Run Tests
+        shell: bash
         run: |
           BUILD_TYPE=${{ matrix.build_type || 'Release' }}
           ctest --test-dir build -C $BUILD_TYPE --output-on-failure
 
       - name: Run Benchmarks
         if: matrix.sanitizers != true
+        shell: bash
         run: |
           if [ "${{ runner.os }}" = "Windows" ]; then
             ./build/benchmarks/Release/bench_wire.exe
           else
             ./build/benchmarks/bench_wire
           fi
+

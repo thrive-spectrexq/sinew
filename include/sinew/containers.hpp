@@ -5,7 +5,9 @@
 #include <type_traits>
 #include <utility>
 #include <string_view>
+#if !defined(SINEW_NO_IOSTREAMS)
 #include <ostream>
+#endif
 #include <cstring>
 #include <algorithm>
 
@@ -218,9 +220,11 @@ public:
     }
 };
 
+#if !defined(SINEW_NO_IOSTREAMS)
 template <size_t Capacity>
 inline std::ostream& operator<<(std::ostream& os, const StaticString<Capacity>& s) {
     return os << s.view();
 }
+#endif
 
 } // namespace sinew

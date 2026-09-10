@@ -1,0 +1,16 @@
+# Build artifacts
+build/
+bin/
+lib/
+out/
+
+# IDE / Editor files
+.vs/
+*.sln
+*.vcxproj*
+.vscode/
+.idea/
+
+# OS specific
+Thumbs.db
+Desktop.ini

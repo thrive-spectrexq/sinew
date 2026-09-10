@@ -10,6 +10,8 @@
 #include <sinew/dispatch.hpp>
 #include <sinew/shm.hpp>
 #include <sinew/ipc_ring_buffer.hpp>
+#include <sinew/ipc_envelope.hpp>
+#include <sinew/portable.hpp>
 
 // High-level macro for defining standard Sinew messages
 #define SINEW_MESSAGE(Name, ...) \

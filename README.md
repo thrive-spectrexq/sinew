@@ -115,8 +115,8 @@ Planned early milestones:
 - [x] Cross-process IPC shared-memory ring buffer (`sinew::IpcRingBuffer` for Windows & POSIX)
 - [x] Zero-allocation bounded containers (`StaticVector`, `StaticString`)
 - [x] Heterogeneous message stream inspect and visitor dispatch (`sinew::dispatch`)
-- [x] Modern CMake package export and multi-platform CI
-- [ ] Portable (endianness-normalized) encode path
+- [x] Heterogeneous IPC shared-memory bus (`sinew::IpcEnvelopeRingBuffer`)
+- [x] Portable (endianness-normalized) encode path (`sinew::portable_encode`/`portable_decode`)
 - [ ] Benchmark suite vs FlatBuffers/Cap'n Proto/SBE on representative telemetry payloads
 - [ ] MCU target validation (Cortex-M4/M7)
 - [ ] Optional ROS 2 bridge for interop with existing robotics stacks

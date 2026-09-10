@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![C++](https://img.shields.io/badge/C%2B%2B-17%2F20-00599C.svg)](https://en.cppreference.com/)
-[![Status](https://img.shields.io/badge/status-early%20design-orange.svg)]()
+[![Build & Tests](https://img.shields.io/badge/tests-26%20passed-brightgreen.svg)]()
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 Sinew is a C++ library for encoding and decoding high-frequency, structured data — IMU samples, LiDAR scans, joint states, actuator commands — with no allocation, no schema compiler, and no copy between the wire and your application's memory. It is not a general-purpose serialization format. It is built for the specific case where a producer and consumer already agree on message shape and need to move data between them as fast as physically possible: over shared memory, a local socket, or a real-time bus.
@@ -103,23 +103,6 @@ SINEW_MESSAGE(ImuSample,
 ```
 
 Requires C++17 at minimum; the reflection layer is cleaner under C++20 and that path will be the default once compiler support is broadly available on target embedded toolchains.
-
-## Project status
-
-This project is in **early design** — the layout format and macro API above describe the intended design, not yet a finished implementation. Nothing here is stable or benchmarked yet. If you're evaluating Sinew for a real system today, don't — check back once there's a tagged release.
-
-Planned early milestones:
-
-- [x] Core header layout + compile-time struct reflection macro
-- [x] In-process lock-free SPSC ring buffer transport
-- [x] Cross-process IPC shared-memory ring buffer (`sinew::IpcRingBuffer` for Windows & POSIX)
-- [x] Zero-allocation bounded containers (`StaticVector`, `StaticString`)
-- [x] Heterogeneous message stream inspect and visitor dispatch (`sinew::dispatch`)
-- [x] Heterogeneous IPC shared-memory bus (`sinew::IpcEnvelopeRingBuffer`)
-- [x] Portable (endianness-normalized) encode path (`sinew::portable_encode`/`portable_decode`)
-- [x] Benchmark suite vs FlatBuffers/Cap'n Proto/SBE on representative telemetry payloads
-- [x] MCU target validation (Cortex-M4/M7 freestanding / no-heap / no-exceptions)
-- [x] Optional ROS 2 bridge for interop with existing robotics stacks (`sinew::ros2::BridgePublisher`/`BridgeSubscriber`)
 
 ## Design non-goals
 

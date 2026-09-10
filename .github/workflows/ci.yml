@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "Ubuntu 22.04 - GCC 11 (C++17)"
+            os: ubuntu-22.04
+            cxx: g++
+            std: 17
+          - name: "Ubuntu 22.04 - GCC 12 (C++20)"
+            os: ubuntu-22.04
+            cxx: g++-12
+            std: 20
+          - name: "Ubuntu 22.04 - Clang 15 (C++17)"
+            os: ubuntu-22.04
+            cxx: clang++-15
+            std: 17
+          - name: "Windows Server 2022 - MSVC (C++17)"
+            os: windows-2022
+            cxx: cl
+            std: 17
+          - name: "macOS 13 - AppleClang (C++17)"
+            os: macos-13
+            cxx: clang++
+            std: 17
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Compiler (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          if [ "${{ matrix.cxx }}" = "g++-12" ]; then
+            sudo apt-get install -y g++-12
+          elif [ "${{ matrix.cxx }}" = "clang++-15" ]; then
+            sudo apt-get install -y clang-15
+          fi
+
+      - name: Configure CMake
+        env:
+          CXX: ${{ matrix.cxx }}
+        run: |
+          cmake -B build \
+            -DCMAKE_CXX_STANDARD=${{ matrix.std }} \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSINEW_BUILD_TESTS=ON \
+            -DSINEW_BUILD_EXAMPLES=ON \
+            -DSINEW_BUILD_BENCHMARKS=ON
+
+      - name: Build
+        run: cmake --build build --config Release
+
+      - name: Run Tests
+        run: ctest --test-dir build -C Release --output-on-failure
+
+      - name: Run Benchmarks
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            ./build/benchmarks/Release/bench_wire.exe
+          else
+            ./build/benchmarks/bench_wire
+          fi

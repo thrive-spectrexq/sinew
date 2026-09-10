@@ -4,6 +4,9 @@ add_executable(sinew_tests
     test_crc32.cpp
     test_wire.cpp
     test_ring_buffer.cpp
+    test_containers.cpp
+    test_dispatch.cpp
+    test_ipc_ring_buffer.cpp
 )
 
 target_link_libraries(sinew_tests PRIVATE sinew::sinew)

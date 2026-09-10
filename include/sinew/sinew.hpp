@@ -6,6 +6,10 @@
 #include <sinew/message.hpp>
 #include <sinew/wire.hpp>
 #include <sinew/ring_buffer.hpp>
+#include <sinew/containers.hpp>
+#include <sinew/dispatch.hpp>
+#include <sinew/shm.hpp>
+#include <sinew/ipc_ring_buffer.hpp>
 
 // High-level macro for defining standard Sinew messages
 #define SINEW_MESSAGE(Name, ...) \

@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
+#include <new>
 
 namespace sinew {
 
@@ -101,7 +102,7 @@ inline T* prepare(void* buffer, size_t capacity) noexcept {
     hdr->crc = 0;
     hdr->payload_len = static_cast<uint32_t>(sizeof(T));
 
-    return reinterpret_cast<T*>(payload_ptr);
+    return new (payload_ptr) T;
 }
 
 template <typename T, size_t N>

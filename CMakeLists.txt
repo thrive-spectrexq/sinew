@@ -38,3 +38,41 @@ endif()
 if(SINEW_BUILD_BENCHMARKS)
     add_subdirectory(benchmarks)
 endif()
+
+# Installation & CMake package export
+include(GNUInstallDirs)
+include(CMakePackageConfigHelpers)
+
+install(TARGETS sinew
+    EXPORT sinewTargets
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY include/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(EXPORT sinewTargets
+    FILE sinewTargets.cmake
+    NAMESPACE sinew::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sinew
+)
+
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/sinewConfigVersion.cmake"
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/sinewConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/sinewConfig.cmake"
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sinew
+)
+
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/sinewConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/sinewConfigVersion.cmake"
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/sinew
+)
+

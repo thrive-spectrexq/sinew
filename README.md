@@ -110,8 +110,12 @@ This project is in **early design** — the layout format and macro API above de
 
 Planned early milestones:
 
-- [ ] Core header layout + compile-time struct reflection macro
-- [ ] Shared-memory ring buffer transport (single-producer/single-consumer)
+- [x] Core header layout + compile-time struct reflection macro
+- [x] In-process lock-free SPSC ring buffer transport
+- [x] Cross-process IPC shared-memory ring buffer (`sinew::IpcRingBuffer` for Windows & POSIX)
+- [x] Zero-allocation bounded containers (`StaticVector`, `StaticString`)
+- [x] Heterogeneous message stream inspect and visitor dispatch (`sinew::dispatch`)
+- [x] Modern CMake package export and multi-platform CI
 - [ ] Portable (endianness-normalized) encode path
 - [ ] Benchmark suite vs FlatBuffers/Cap'n Proto/SBE on representative telemetry payloads
 - [ ] MCU target validation (Cortex-M4/M7)

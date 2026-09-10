@@ -23,7 +23,7 @@ struct DiagnosticAlert {
 SINEW_REGISTER_MESSAGE(DiagnosticAlert, 30, 1);
 
 TEST_CASE(TestIpcEnvelopeBasic) {
-    const std::string shm_name = "sinew_test_ipc_envelope_basic";
+    const std::string shm_name = "sinew_test_ipc_env_basic";
     constexpr size_t kMaxPayload = 128;
     constexpr size_t kCapacity = 32;
 
@@ -93,7 +93,7 @@ TEST_CASE(TestIpcEnvelopeBasic) {
 }
 
 TEST_CASE(TestIpcEnvelopeConcurrentMixedStream) {
-    const std::string shm_name = "sinew_test_ipc_envelope_concurrent";
+    const std::string shm_name = "sinew_test_ipc_env_concur";
     constexpr size_t kMaxPayload = 128;
     constexpr size_t kCapacity = 512;
     constexpr size_t kRounds = 5000;

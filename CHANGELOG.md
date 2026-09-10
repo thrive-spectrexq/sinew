@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Freestanding IOStream Guarding**: Guarded `operator<<` overloads with `#if !defined(SINEW_NO_IOSTREAMS)` across headers and configured the embedded `mcu_freestanding` build with zero exception unwinding warnings.
 
 ### Changed
+- **POSIX Shared Memory Name Clamping**: Enforced POSIX/macOS compliance in `SharedMemoryRegion` by normalizing names with a leading slash and clamping to 31 bytes (macOS `PSHMNAMELENGTH` limit), eliminating `ENAMETOOLONG` errors.
 - **Zeroed Padding in prepare<T>()**: prepare<T>() now executes std::memset across the payload memory before placement-new, eliminating non-deterministic alignment padding bytes and ensuring reproducible CRC32 checksums.
 - **Strict ID Validation**: Removed the wildcard ID check (xpected_id != 0) from alidate<T>() and portable_decode(), enforcing exact message ID matching across all decodes.
 - **CMake Warning Isolation**: Warning flags (-Wall -Wextra -Wpedantic /W4) were extracted into an internal sinew_internal_warnings target, preventing flag leakage to downstream consumers of sinew::sinew.

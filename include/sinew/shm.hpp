@@ -23,6 +23,25 @@
 
 namespace sinew {
 
+namespace detail {
+#if !defined(_WIN32)
+inline std::string normalize_posix_shm_name(std::string_view name) {
+    std::string s;
+    if (name.empty() || name[0] != '/') {
+        s = "/" + std::string(name);
+    } else {
+        s = std::string(name);
+    }
+    // macOS limits shm_open names to 31 bytes total (including leading '/').
+    // If the name exceeds 31 characters, truncate and encode length to stay unique and valid.
+    if (s.length() > 31) {
+        s.resize(31);
+    }
+    return s;
+}
+#endif
+} // namespace detail
+
 /**
  * @brief Cross-platform RAII Shared Memory Region for Zero-Copy IPC.
  *
@@ -123,7 +142,7 @@ public:
         region.handle_ = hMap;
         region.data_ = ptr;
 #else
-        std::string posix_name = (name.empty() || name[0] != '/') ? ("/" + region.name_) : region.name_;
+        std::string posix_name = detail::normalize_posix_shm_name(region.name_);
         int fd = shm_open(posix_name.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0660);
         if (fd < 0) {
             return SharedMemoryRegion{};
@@ -190,7 +209,7 @@ public:
         region.handle_ = hMap;
         region.data_ = ptr;
 #else
-        std::string posix_name = (name.empty() || name[0] != '/') ? ("/" + region.name_) : region.name_;
+        std::string posix_name = detail::normalize_posix_shm_name(region.name_);
         int fd = shm_open(posix_name.c_str(), O_CREAT | O_EXCL | O_RDWR, 0660);
         if (fd < 0) {
             return SharedMemoryRegion{};
@@ -237,7 +256,7 @@ public:
         region.handle_ = hMap;
         region.data_ = ptr;
 #else
-        std::string posix_name = (name.empty() || name[0] != '/') ? ("/" + region.name_) : region.name_;
+        std::string posix_name = detail::normalize_posix_shm_name(region.name_);
         int fd = shm_open(posix_name.c_str(), O_RDWR, 0660);
         if (fd < 0) {
             return SharedMemoryRegion{};
@@ -276,7 +295,7 @@ public:
             fd_ = -1;
         }
         if (is_creator_ && !name_.empty()) {
-            std::string posix_name = (name_[0] != '/') ? ("/" + name_) : name_;
+            std::string posix_name = detail::normalize_posix_shm_name(name_);
             shm_unlink(posix_name.c_str());
         }
 #endif

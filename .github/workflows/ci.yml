@@ -36,8 +36,8 @@ jobs:
             os: windows-2022
             cxx: cl
             std: 17
-          - name: "macOS 13 - AppleClang (C++17)"
-            os: macos-13
+          - name: "macOS 14 - AppleClang (C++17)"
+            os: macos-14
             cxx: clang++
             std: 17
 

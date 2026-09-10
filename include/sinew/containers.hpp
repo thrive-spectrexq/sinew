@@ -10,8 +10,12 @@
 #endif
 #include <cstring>
 #include <algorithm>
-#if !defined(SINEW_NO_EXCEPTIONS)
+
+#if (defined(__cpp_exceptions) || defined(__EXCEPTIONS) || defined(_CPPUNWIND)) && !defined(SINEW_NO_EXCEPTIONS)
+#define SINEW_HAS_EXCEPTIONS 1
 #include <stdexcept>
+#else
+#define SINEW_HAS_EXCEPTIONS 0
 #endif
 
 namespace sinew {
@@ -98,7 +102,7 @@ public:
 
     constexpr reference at(size_type index) {
         if (index >= size_) {
-#if !defined(SINEW_NO_EXCEPTIONS)
+#if SINEW_HAS_EXCEPTIONS
             throw std::out_of_range("StaticVector::at() index out of range");
 #else
             return data_[0];
@@ -109,7 +113,7 @@ public:
 
     constexpr const_reference at(size_type index) const {
         if (index >= size_) {
-#if !defined(SINEW_NO_EXCEPTIONS)
+#if SINEW_HAS_EXCEPTIONS
             throw std::out_of_range("StaticVector::at() index out of range");
 #else
             return data_[0];
@@ -241,7 +245,7 @@ public:
 
     constexpr char at(size_type index) const {
         if (index >= size_) {
-#if !defined(SINEW_NO_EXCEPTIONS)
+#if SINEW_HAS_EXCEPTIONS
             throw std::out_of_range("StaticString::at() index out of range");
 #else
             return data_[0];
@@ -252,7 +256,7 @@ public:
 
     constexpr char& at(size_type index) {
         if (index >= size_) {
-#if !defined(SINEW_NO_EXCEPTIONS)
+#if SINEW_HAS_EXCEPTIONS
             throw std::out_of_range("StaticString::at() index out of range");
 #else
             return data_[0];

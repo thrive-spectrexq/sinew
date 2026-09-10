@@ -84,4 +84,12 @@ TEST_CASE(TestHeterogeneousDispatch) {
     // Dispatch unhandled StatusMsg should return false
     bool res3 = sinew::dispatch<PingMsg, PongMsg>(status_buf, status_sz, visitor, true);
     REQUIRE(!res3);
+
+    // Test dispatch from PacketView
+    sinew::PacketView pv;
+    REQUIRE_EQ(sinew::inspect_packet(ping_buf, ping_sz, pv), sinew::ErrorCode::Ok);
+    bool res_pv = sinew::dispatch<PingMsg, PongMsg>(pv, visitor, true);
+    REQUIRE(res_pv);
+    REQUIRE_EQ(ping_count, 2);
 }
+

@@ -14,6 +14,8 @@ target_include_directories(sinew INTERFACE
     $<INSTALL_INTERFACE:include>
 )
 
+target_compile_features(sinew INTERFACE cxx_std_17)
+
 # Internal compiler warning target for repository tests, examples, and benchmarks
 add_library(sinew_internal_warnings INTERFACE)
 if(MSVC)

@@ -90,4 +90,17 @@ inline bool dispatch(const void* buffer, size_t size, Visitor&& visitor, bool ve
     ) || ...);
 }
 
+/**
+ * @brief Dispatch directly from a pre-inspected PacketView.
+ */
+template <typename... MsgTypes, typename Visitor>
+inline bool dispatch(const PacketView& pv, Visitor&& visitor, bool verify_crc = false) {
+    if (!pv.is_valid()) {
+        return false;
+    }
+    const void* raw_buffer = pv.payload - sizeof(Header);
+    size_t total_size = sizeof(Header) + pv.payload_len;
+    return dispatch<MsgTypes...>(raw_buffer, total_size, std::forward<Visitor>(visitor), verify_crc);
+}
+
 } // namespace sinew

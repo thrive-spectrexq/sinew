@@ -91,14 +91,15 @@ target_link_libraries(your_target PRIVATE sinew::sinew)
 ```cpp
 #include <sinew/sinew.hpp>
 
+// Plain C++ struct member declarations inside SINEW_MESSAGE
 SINEW_MESSAGE(ImuSample,
-    (double, timestamp_ns)
-    (float,  accel_x)
-    (float,  accel_y)
-    (float,  accel_z)
-    (float,  gyro_x)
-    (float,  gyro_y)
-    (float,  gyro_z)
+    double timestamp_ns;
+    float  accel_x;
+    float  accel_y;
+    float  accel_z;
+    float  gyro_x;
+    float  gyro_y;
+    float  gyro_z;
 );
 ```
 

@@ -102,7 +102,9 @@ public:
 
 int main() {
     std::cout << "=================================================================================\n";
-    std::cout << "Sinew vs Serialization Architectures Comparative Micro-Benchmark\n";
+    std::cout << "Sinew Architectural Comparison: Direct Wire vs In-Repo Reference Encoders\n";
+    std::cout << "  (Note: Compares Sinew in-place wire layout against architectural reference\n";
+    std::cout << "   models: Direct Wire vs VTable Indirection vs Sequential Stream Framing)\n";
     std::cout << "=================================================================================\n";
     std::cout << "Payload: IMU Telemetry (1x uint64, 6x float, 1x float temp)\n";
     std::cout << "Target: 5,000,000 iterations per benchmark\n\n";

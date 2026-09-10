@@ -40,7 +40,7 @@ public:
             _oss << "Assertion failed: (" #cond ") at " << __FILE__ << ":" << __LINE__; \
             throw ::test::TestFailureException(_oss.str()); \
         } \
-    } while (0,0)
+    } while (0)
 
 #define REQUIRE_EQ(a, b) \
     do { \
@@ -49,7 +49,7 @@ public:
             _oss << "Assertion failed: (" #a " == " #b ") [" << (a) << " != " << (b) << "] at " << __FILE__ << ":" << __LINE__; \
             throw ::test::TestFailureException(_oss.str()); \
         } \
-    } while (0,0)
+    } while (0)
 
 #define REQUIRE_NE(a, b) \
     do { \
@@ -58,7 +58,7 @@ public:
             _oss << "Assertion failed: (" #a " != " #b ") at " << __FILE__ << ":" << __LINE__; \
             throw ::test::TestFailureException(_oss.str()); \
         } \
-    } while (0,0)
+    } while (0)
 
 #define TEST_CASE(name) \
     static void name(); \

@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <type_traits>
 #include <new>
+#include <cstring>
 
 namespace sinew {
 
@@ -41,7 +42,7 @@ ErrorCode validate(const void* buffer, size_t size, bool verify_crc = false) noe
     }
 
     constexpr uint16_t expected_id = MessageTraits<T>::id;
-    if (expected_id != 0 && hdr->msg_id != expected_id) {
+    if (hdr->msg_id != expected_id) {
         return ErrorCode::IdMismatch;
     }
 
@@ -58,6 +59,28 @@ ErrorCode validate(const void* buffer, size_t size, bool verify_crc = false) noe
     }
 
     return ErrorCode::Ok;
+}
+
+template <typename T>
+struct ViewResult {
+    const T* value{nullptr};
+    ErrorCode error{ErrorCode::Ok};
+
+    constexpr bool ok() const noexcept { return error == ErrorCode::Ok && value != nullptr; }
+    constexpr bool has_value() const noexcept { return value != nullptr; }
+    constexpr explicit operator bool() const noexcept { return ok(); }
+    constexpr const T* operator->() const noexcept { return value; }
+    constexpr const T& operator*() const noexcept { return *value; }
+};
+
+template <typename T>
+inline ViewResult<T> view_result(const void* buffer, size_t size, bool verify_crc = false) noexcept {
+    ErrorCode err = validate<T>(buffer, size, verify_crc);
+    if (err != ErrorCode::Ok) {
+        return ViewResult<T>{nullptr, err};
+    }
+    const auto* byte_ptr = static_cast<const uint8_t*>(buffer);
+    return ViewResult<T>{reinterpret_cast<const T*>(byte_ptr + sizeof(Header)), ErrorCode::Ok};
 }
 
 template <typename T>
@@ -102,6 +125,9 @@ inline T* prepare(void* buffer, size_t capacity) noexcept {
     hdr->crc = 0;
     hdr->payload_len = static_cast<uint32_t>(sizeof(T));
 
+    // Explicitly zero the payload memory to guarantee all inter-field alignment padding
+    // bytes are deterministic for reproducible CRC32 checksums.
+    std::memset(payload_ptr, 0, sizeof(T));
     return new (payload_ptr) T;
 }
 

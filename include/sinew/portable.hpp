@@ -176,7 +176,7 @@ inline ErrorCode portable_decode(const void* src, size_t src_len, T& dest, bool 
 
     uint16_t msg_id = from_little_endian(hdr->msg_id);
     constexpr uint16_t expected_id = MessageTraits<T>::id;
-    if (expected_id != 0 && msg_id != expected_id) {
+    if (msg_id != expected_id) {
         return ErrorCode::IdMismatch;
     }
 

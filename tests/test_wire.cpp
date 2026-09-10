@@ -89,3 +89,103 @@ TEST_CASE(TestValidationErrors) {
     REQUIRE_EQ(sinew::validate<TestTelemetry>(wire_buffer, sizeof(wire_buffer), /*verify_crc=*/true), 
                sinew::ErrorCode::ChecksumMismatch);
 }
+
+// Structs defined via convenience macros to verify unique non-zero IDs and type confusion prevention
+SINEW_MESSAGE(MacroMsgA,
+    uint32_t a;
+    uint32_t b;
+);
+
+SINEW_MESSAGE(MacroMsgB,
+    uint32_t x;
+    uint32_t y;
+);
+
+TEST_CASE(TestConvenienceMacroUniqueIds) {
+    // Both types have the exact same size, but must have distinct, non-zero IDs
+    static_assert(sizeof(MacroMsgA) == sizeof(MacroMsgB), "Payload sizes should match for collision check");
+    REQUIRE_NE(sinew::MessageTraits<MacroMsgA>::id, 0u);
+    REQUIRE_NE(sinew::MessageTraits<MacroMsgB>::id, 0u);
+    REQUIRE_NE(sinew::MessageTraits<MacroMsgA>::id, sinew::MessageTraits<MacroMsgB>::id);
+
+    uint8_t buffer[sinew::message_size<MacroMsgA>()];
+    MacroMsgA* msg_a = sinew::prepare<MacroMsgA>(buffer);
+    msg_a->a = 42;
+    msg_a->b = 100;
+    sinew::finalize(msg_a, true);
+
+    // Decoding buffer as MacroMsgA must succeed
+    REQUIRE(sinew::view<MacroMsgA>(buffer, sizeof(buffer)) != nullptr);
+
+    // Decoding buffer as MacroMsgB must fail with IdMismatch (no type confusion despite matching sizeof)
+    auto res_b = sinew::view_result<MacroMsgB>(buffer, sizeof(buffer));
+    REQUIRE(!res_b.ok());
+    REQUIRE_EQ(res_b.error, sinew::ErrorCode::IdMismatch);
+}
+
+struct StructWithPadding {
+    uint8_t  flag;       // 1 byte
+    // 7 bytes alignment padding
+    uint64_t timestamp;  // 8 bytes
+    uint8_t  flag2;      // 1 byte
+    // 7 bytes alignment padding
+    double   value;      // 8 bytes
+};
+SINEW_REGISTER_MESSAGE(StructWithPadding, 777, 1);
+
+TEST_CASE(TestPaddingZeroingDeterminism) {
+    // Fill two wire buffers with completely different dirty patterns
+    alignas(16) uint8_t buf1[sinew::message_size<StructWithPadding>()];
+    alignas(16) uint8_t buf2[sinew::message_size<StructWithPadding>()];
+    std::memset(buf1, 0xAA, sizeof(buf1));
+    std::memset(buf2, 0x55, sizeof(buf2));
+
+    // Prepare both payloads (sinew::prepare zeroes padding bytes)
+    StructWithPadding* s1 = sinew::prepare<StructWithPadding>(buf1);
+    StructWithPadding* s2 = sinew::prepare<StructWithPadding>(buf2);
+
+    s1->flag = 1;
+    s1->timestamp = 12345678ULL;
+    s1->flag2 = 2;
+    s1->value = 3.14159;
+
+    s2->flag = 1;
+    s2->timestamp = 12345678ULL;
+    s2->flag2 = 2;
+    s2->value = 3.14159;
+
+    sinew::finalize(s1, /*compute_crc=*/true);
+    sinew::finalize(s2, /*compute_crc=*/true);
+
+    const auto& hdr1 = sinew::get_header(s1);
+    const auto& hdr2 = sinew::get_header(s2);
+
+    // CRC must be completely identical despite dirty initial buffers because prepare zeroed the padding
+    REQUIRE_EQ(hdr1.crc, hdr2.crc);
+    REQUIRE_EQ(std::memcmp(buf1, buf2, sizeof(buf1)), 0);
+}
+
+TEST_CASE(TestViewResult) {
+    uint8_t wire_buffer[sinew::message_size<TestTelemetry>()];
+    TestTelemetry* out = sinew::prepare<TestTelemetry>(wire_buffer);
+    out->timestamp_ns = 123;
+    out->temperature = 20.0f;
+    out->pressure = 1000.0f;
+    out->status_flags = 0;
+    sinew::finalize(out, true);
+
+    // Successful view_result
+    auto res = sinew::view_result<TestTelemetry>(wire_buffer, sizeof(wire_buffer), true);
+    REQUIRE(res.ok());
+    REQUIRE(res.has_value());
+    REQUIRE_EQ(res.error, sinew::ErrorCode::Ok);
+    REQUIRE(res.value != nullptr);
+    REQUIRE_EQ(res.value->timestamp_ns, 123ULL);
+
+    // Corrupt buffer length
+    auto res_short = sinew::view_result<TestTelemetry>(wire_buffer, sizeof(sinew::Header));
+    REQUIRE(!res_short.ok());
+    REQUIRE_EQ(res_short.error, sinew::ErrorCode::BufferTooSmall);
+    REQUIRE(res_short.value == nullptr);
+}
+

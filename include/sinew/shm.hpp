@@ -82,6 +82,14 @@ public:
         return *this;
     }
 
+    /**
+     * @brief Create a new shared memory region, resetting any existing segment with the same name.
+     *
+     * OPERATIONAL CONSTRAINT: If attached consumers are actively reading an existing segment,
+     * calling create() on POSIX truncates and resets state, which will orphan consumer cursors.
+     * In multi-process production deployments, use create_exclusive() to guarantee that no
+     * previous segment is currently active.
+     */
     static SharedMemoryRegion create(std::string_view name, size_t size) {
         SharedMemoryRegion region;
         region.name_ = std::string(name);
@@ -117,6 +125,73 @@ public:
 #else
         std::string posix_name = (name.empty() || name[0] != '/') ? ("/" + region.name_) : region.name_;
         int fd = shm_open(posix_name.c_str(), O_CREAT | O_RDWR | O_TRUNC, 0660);
+        if (fd < 0) {
+            return SharedMemoryRegion{};
+        }
+
+        if (ftruncate(fd, static_cast<off_t>(size)) != 0) {
+            ::close(fd);
+            shm_unlink(posix_name.c_str());
+            return SharedMemoryRegion{};
+        }
+
+        void* ptr = mmap(nullptr, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+        if (ptr == MAP_FAILED) {
+            ::close(fd);
+            shm_unlink(posix_name.c_str());
+            return SharedMemoryRegion{};
+        }
+
+        region.fd_ = fd;
+        region.data_ = ptr;
+#endif
+        return region;
+    }
+
+    /**
+     * @brief Create a new shared memory region exclusively.
+     * Fails if a segment with the given name already exists.
+     */
+    static SharedMemoryRegion create_exclusive(std::string_view name, size_t size) {
+        SharedMemoryRegion region;
+        region.name_ = std::string(name);
+        region.size_ = size;
+        region.is_creator_ = true;
+
+#if defined(_WIN32)
+        std::string win_name = "Local\\" + region.name_;
+        ULARGE_INTEGER li;
+        li.QuadPart = static_cast<ULONGLONG>(size);
+
+        HANDLE hMap = CreateFileMappingA(
+            INVALID_HANDLE_VALUE,
+            nullptr,
+            PAGE_READWRITE,
+            li.HighPart,
+            li.LowPart,
+            win_name.c_str()
+        );
+
+        if (hMap == nullptr) {
+            return SharedMemoryRegion{};
+        }
+
+        if (GetLastError() == ERROR_ALREADY_EXISTS) {
+            CloseHandle(hMap);
+            return SharedMemoryRegion{};
+        }
+
+        void* ptr = MapViewOfFile(hMap, FILE_MAP_ALL_ACCESS, 0, 0, size);
+        if (ptr == nullptr) {
+            CloseHandle(hMap);
+            return SharedMemoryRegion{};
+        }
+
+        region.handle_ = hMap;
+        region.data_ = ptr;
+#else
+        std::string posix_name = (name.empty() || name[0] != '/') ? ("/" + region.name_) : region.name_;
+        int fd = shm_open(posix_name.c_str(), O_CREAT | O_EXCL | O_RDWR, 0660);
         if (fd < 0) {
             return SharedMemoryRegion{};
         }

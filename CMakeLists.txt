@@ -14,12 +14,14 @@ target_include_directories(sinew INTERFACE
     $<INSTALL_INTERFACE:include>
 )
 
-# Compiler warnings and options
+# Internal compiler warning target for repository tests, examples, and benchmarks
+add_library(sinew_internal_warnings INTERFACE)
 if(MSVC)
-    target_compile_options(sinew INTERFACE /W4 /permissive-)
+    target_compile_options(sinew_internal_warnings INTERFACE /W4 /permissive-)
 else()
-    target_compile_options(sinew INTERFACE -Wall -Wextra -Wpedantic)
+    target_compile_options(sinew_internal_warnings INTERFACE -Wall -Wextra -Wpedantic)
 endif()
+
 
 # Optional components
 option(SINEW_BUILD_TESTS "Build Sinew unit test suite" ON)

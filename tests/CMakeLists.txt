@@ -12,7 +12,7 @@ add_executable(sinew_tests
     test_ros2_bridge.cpp
 )
 
-target_link_libraries(sinew_tests PRIVATE sinew::sinew)
+target_link_libraries(sinew_tests PRIVATE sinew::sinew sinew_internal_warnings)
 target_include_directories(sinew_tests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_test(NAME SinewAllTests COMMAND sinew_tests)

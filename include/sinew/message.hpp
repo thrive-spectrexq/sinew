@@ -29,6 +29,16 @@ template <typename T>
 inline constexpr bool is_valid_message_v = 
     std::is_trivially_copyable_v<T> && std::is_standard_layout_v<T> && !std::is_pointer_v<T>;
 
+// 16-bit compile-time FNV-1a hash for automatic unique message ID generation
+constexpr uint16_t fnv1a16(std::string_view s) noexcept {
+    uint32_t hash = 0x811c9dc5u;
+    for (char c : s) {
+        hash = (hash ^ static_cast<uint8_t>(c)) * 0x01000193u;
+    }
+    uint16_t h16 = static_cast<uint16_t>((hash >> 16) ^ (hash & 0xFFFFu));
+    return (h16 == 0) ? 1u : h16; // Ensure never 0
+}
+
 #if __cplusplus >= 202002L
 template <typename T>
 concept Message = is_valid_message_v<T>;
@@ -46,13 +56,4 @@ concept Message = is_valid_message_v<T>;
             static constexpr std::string_view name = #Type; \
         }; \
     }
-
-// Macro helpers for defining messages
-#define SINEW_FIELD(type, name) type name;
-
-#define SINEW_MESSAGE_STRUCT(Name, ...) \
-    struct Name { \
-        __VA_ARGS__ \
-    }; \
-    SINEW_REGISTER_MESSAGE(Name, 0, 1)
 

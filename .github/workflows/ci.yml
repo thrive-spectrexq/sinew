@@ -26,6 +26,12 @@ jobs:
             os: ubuntu-22.04
             cxx: clang++-15
             std: 17
+          - name: "Ubuntu 22.04 - GCC 12 (ASan / UBSan Debug)"
+            os: ubuntu-22.04
+            cxx: g++-12
+            std: 17
+            build_type: Debug
+            sanitizers: true
           - name: "Windows Server 2022 - MSVC (C++17)"
             os: windows-2022
             cxx: cl
@@ -52,20 +58,31 @@ jobs:
         env:
           CXX: ${{ matrix.cxx }}
         run: |
+          BUILD_TYPE=${{ matrix.build_type || 'Release' }}
+          EXTRA_FLAGS=""
+          if [ "${{ matrix.sanitizers }}" = "true" ]; then
+            EXTRA_FLAGS="-DCMAKE_CXX_FLAGS=-fsanitize=address,undefined -g -O1"
+          fi
           cmake -B build \
             -DCMAKE_CXX_STANDARD=${{ matrix.std }} \
-            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+            $EXTRA_FLAGS \
             -DSINEW_BUILD_TESTS=ON \
             -DSINEW_BUILD_EXAMPLES=ON \
             -DSINEW_BUILD_BENCHMARKS=ON
 
       - name: Build
-        run: cmake --build build --config Release
+        run: |
+          BUILD_TYPE=${{ matrix.build_type || 'Release' }}
+          cmake --build build --config $BUILD_TYPE
 
       - name: Run Tests
-        run: ctest --test-dir build -C Release --output-on-failure
+        run: |
+          BUILD_TYPE=${{ matrix.build_type || 'Release' }}
+          ctest --test-dir build -C $BUILD_TYPE --output-on-failure
 
       - name: Run Benchmarks
+        if: matrix.sanitizers != true
         run: |
           if [ "${{ runner.os }}" = "Windows" ]; then
             ./build/benchmarks/Release/bench_wire.exe

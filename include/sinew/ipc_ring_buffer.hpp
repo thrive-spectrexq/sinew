@@ -224,6 +224,15 @@ public:
         return true;
     }
 
+    template <typename Func>
+    bool consume(Func&& func, bool verify_crc = false) {
+        const T* item = peek_read(verify_crc);
+        if (item == nullptr) return false;
+        func(*item);
+        commit_read();
+        return true;
+    }
+
 private:
     SharedMemoryRegion shm_{};
     IpcRingHeader* hdr_{nullptr};

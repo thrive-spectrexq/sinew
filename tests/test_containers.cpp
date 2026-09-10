@@ -45,6 +45,29 @@ TEST_CASE(TestStaticVectorBasic) {
 
     vec.clear();
     REQUIRE(vec.empty());
+
+    // Test resize (growing from empty)
+    REQUIRE(vec.resize(2, 99));
+    REQUIRE_EQ(vec.size(), 2u);
+    REQUIRE_EQ(vec[0], 99);
+    REQUIRE_EQ(vec[1], 99);
+    REQUIRE(!vec.resize(10)); // Exceeds capacity
+
+    // Test at() access and bounds checking
+    REQUIRE_EQ(vec.at(0), 99);
+    REQUIRE_EQ(vec.at(1), 99);
+#if !defined(SINEW_NO_EXCEPTIONS)
+    bool caught_oob = false;
+    try {
+        vec.at(2);
+    } catch (const std::out_of_range&) {
+        caught_oob = true;
+    }
+    REQUIRE(caught_oob);
+#endif
+
+    vec.clear();
+    REQUIRE(vec.empty());
     REQUIRE_EQ(vec.size(), 0u);
     REQUIRE(!vec.pop_back());
 }
@@ -58,6 +81,18 @@ TEST_CASE(TestStaticStringBasic) {
     REQUIRE_EQ(str.size(), 5u);
     REQUIRE_EQ(str.view(), "hello");
     REQUIRE_EQ(std::string_view(str.c_str()), "hello");
+    REQUIRE_EQ(str.at(0), 'h');
+    REQUIRE_EQ(str.at(4), 'o');
+
+#if !defined(SINEW_NO_EXCEPTIONS)
+    bool caught_str_oob = false;
+    try {
+        str.at(5);
+    } catch (const std::out_of_range&) {
+        caught_str_oob = true;
+    }
+    REQUIRE(caught_str_oob);
+#endif
 
     REQUIRE(str.append(" world"));
     REQUIRE_EQ(str.view(), "hello world");

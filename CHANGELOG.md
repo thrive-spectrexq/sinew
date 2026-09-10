@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Determinism & Hardening Tests**: Added comprehensive tests in 	ests/test_wire.cpp verifying message ID uniqueness, prevention of type-confusion across equal-sized structs, zeroed padding determinism, and ViewResult error checking.
 - **Scaffolding**: Added CONTRIBUTING.md and .github/CODEOWNERS.
 - **PacketView Direct Dispatch**: Added `dispatch<MsgTypes...>(const PacketView&, Visitor&&, bool)` in `include/sinew/dispatch.hpp` allowing pattern matching directly from pre-inspected wire packets without pointer offset recalculation.
+- **Ring Buffer Consumer Callbacks**: Added `consume(Func&&)` method to `SpscRingBuffer` and `IpcRingBuffer`, allowing in-place processing with zero copy and automatic commit.
+- **StaticContainer Bounds Checking & Resizing**: Added `at(index)` and `resize(size, val)` to `StaticVector` and `at(index)` to `StaticString` with conditional exception support (`SINEW_NO_EXCEPTIONS`).
 - **CMake Compile Features**: Added `target_compile_features(sinew INTERFACE cxx_std_17)` in `CMakeLists.txt` guaranteeing consumer targets automatically enforce C++17 requirements.
 - **Freestanding IOStream Guarding**: Guarded `operator<<` overloads with `#if !defined(SINEW_NO_IOSTREAMS)` across headers and configured the embedded `mcu_freestanding` build with zero exception unwinding warnings.
 

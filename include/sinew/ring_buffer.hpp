@@ -128,6 +128,18 @@ public:
         return true;
     }
 
+    // Consumer convenience: Process in-place with callback and automatically commit on success
+    template <typename Func>
+    bool consume(Func&& func, bool verify_crc = false) {
+        const T* item = peek_read(verify_crc);
+        if (item == nullptr) {
+            return false;
+        }
+        func(*item);
+        commit_read();
+        return true;
+    }
+
 private:
     // Align head and tail to distinct 64-byte cache lines to eliminate false sharing
     alignas(64) std::atomic<size_t> head_{0};

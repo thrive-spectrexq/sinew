@@ -10,6 +10,9 @@
 #endif
 #include <cstring>
 #include <algorithm>
+#if !defined(SINEW_NO_EXCEPTIONS)
+#include <stdexcept>
+#endif
 
 namespace sinew {
 
@@ -74,11 +77,44 @@ public:
         return true;
     }
 
+    constexpr bool resize(size_type new_size, const T& default_value = T{}) noexcept {
+        if (new_size > Capacity) {
+            return false;
+        }
+        for (size_type i = size_; i < new_size; ++i) {
+            data_[i] = default_value;
+        }
+        size_ = new_size;
+        return true;
+    }
+
     constexpr reference operator[](size_type index) noexcept {
         return data_[index];
     }
 
     constexpr const_reference operator[](size_type index) const noexcept {
+        return data_[index];
+    }
+
+    constexpr reference at(size_type index) {
+        if (index >= size_) {
+#if !defined(SINEW_NO_EXCEPTIONS)
+            throw std::out_of_range("StaticVector::at() index out of range");
+#else
+            return data_[0];
+#endif
+        }
+        return data_[index];
+    }
+
+    constexpr const_reference at(size_type index) const {
+        if (index >= size_) {
+#if !defined(SINEW_NO_EXCEPTIONS)
+            throw std::out_of_range("StaticVector::at() index out of range");
+#else
+            return data_[0];
+#endif
+        }
         return data_[index];
     }
 
@@ -202,6 +238,28 @@ public:
 
     constexpr char operator[](size_type index) const noexcept { return data_[index]; }
     constexpr char& operator[](size_type index) noexcept { return data_[index]; }
+
+    constexpr char at(size_type index) const {
+        if (index >= size_) {
+#if !defined(SINEW_NO_EXCEPTIONS)
+            throw std::out_of_range("StaticString::at() index out of range");
+#else
+            return data_[0];
+#endif
+        }
+        return data_[index];
+    }
+
+    constexpr char& at(size_type index) {
+        if (index >= size_) {
+#if !defined(SINEW_NO_EXCEPTIONS)
+            throw std::out_of_range("StaticString::at() index out of range");
+#else
+            return data_[0];
+#endif
+        }
+        return data_[index];
+    }
 
     constexpr bool operator==(std::string_view other) const noexcept {
         return view() == other;

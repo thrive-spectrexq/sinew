@@ -91,3 +91,34 @@ TEST_CASE(TestRingBufferMultiThreadedSPSC) {
     producer.join();
     consumer.join();
 }
+
+TEST_CASE(TestRingBufferConsumeCallback) {
+    sinew::SpscRingBuffer<RingMsg, 4> rb;
+
+    RingMsg msg1{10, 100};
+    RingMsg msg2{20, 200};
+    REQUIRE(rb.push(msg1));
+    REQUIRE(rb.push(msg2));
+
+    uint64_t processed_seq = 0;
+    bool consumed = rb.consume([&](const RingMsg& msg) {
+        processed_seq = msg.seq;
+        REQUIRE_EQ(msg.val, 100u);
+    });
+    REQUIRE(consumed);
+    REQUIRE_EQ(processed_seq, 10u);
+
+    // Second message
+    consumed = rb.consume([&](const RingMsg& msg) {
+        processed_seq = msg.seq;
+        REQUIRE_EQ(msg.val, 200u);
+    });
+    REQUIRE(consumed);
+    REQUIRE_EQ(processed_seq, 20u);
+
+    // Third consume on empty buffer should return false
+    consumed = rb.consume([&](const RingMsg&) {});
+    REQUIRE(!consumed);
+    REQUIRE(rb.empty());
+}
+

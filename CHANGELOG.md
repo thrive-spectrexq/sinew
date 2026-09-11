@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-11
+
 ### Added
 - **Automated Non-Zero Message IDs**: Integrated fnv1a16 compile-time string hashing in include/sinew/message.hpp and include/sinew/sinew.hpp. Messages created with SINEW_MESSAGE(Name, ...) now produce unique, deterministic non-zero IDs by default.
 - **Explicit ID Definition Macro**: Added SINEW_MESSAGE_ID(Name, MsgId, ...) alongside SINEW_MESSAGE_VERSIONED.

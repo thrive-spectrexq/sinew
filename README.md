@@ -4,7 +4,7 @@
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![C++](https://img.shields.io/badge/C%2B%2B-17%2F20-00599C.svg)](https://en.cppreference.com/)
-[![Build & Tests](https://img.shields.io/badge/tests-26%20passed-brightgreen.svg)]()
+[![Build & Tests](https://img.shields.io/badge/tests-31%20passed-brightgreen.svg)]()
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 Sinew is a C++ library for encoding and decoding high-frequency, structured data — IMU samples, LiDAR scans, joint states, actuator commands — with no allocation, no schema compiler, and no copy between the wire and your application's memory. It is not a general-purpose serialization format. It is built for the specific case where a producer and consumer already agree on message shape and need to move data between them as fast as physically possible: over shared memory, a local socket, or a real-time bus.

@@ -112,3 +112,27 @@ TEST_CASE(TestPortableEncodeDecodeRoundTrip) {
     sinew::ErrorCode err_corrupt = sinew::portable_decode(wire_buf, encoded_bytes, in_waypoint, true);
     REQUIRE_EQ(err_corrupt, sinew::ErrorCode::ChecksumMismatch);
 }
+
+TEST_CASE(TestStaticVectorPortableSwap) {
+    sinew::StaticVector<uint32_t, 8> vec;
+    vec.push_back(0x12345678);
+    vec.push_back(0xAABBCCDD);
+
+    REQUIRE_EQ(vec.size(), 2u);
+
+    // Call portable_swap directly
+    sinew::portable_swap(vec);
+
+    // Size should be byte swapped
+    REQUIRE_EQ(vec.size(), sinew::byte_swap(2u));
+    // Populated elements should be byte swapped
+    REQUIRE_EQ(vec.data_[0], 0x78563412u);
+    REQUIRE_EQ(vec.data_[1], 0xDDCCBBAAu);
+
+    // Swap back
+    sinew::portable_swap(vec);
+    REQUIRE_EQ(vec.size(), 2u);
+    REQUIRE_EQ(vec[0], 0x12345678u);
+    REQUIRE_EQ(vec[1], 0xAABBCCDDu);
+}
+

@@ -10,10 +10,6 @@
 #include <string_view>
 #include <functional>
 
-#if defined(SINEW_HAS_ROS2)
-#include <rclcpp/rclcpp.hpp>
-#endif
-
 namespace sinew {
 namespace ros2 {
 
@@ -24,7 +20,7 @@ namespace ros2 {
  *
  * NOTE: This header provides zero-copy bridging schemas and worker loops designed
  * to interface Sinew high-frequency telemetry loops with ROS 2 subscriber/publisher
- * callbacks without pulling heavy ROS 2 dependencies into embedded cores.
+ * callbacks without requiring or pulling in heavy ROS 2 middleware dependencies.
  */
 
 struct Vector3 {

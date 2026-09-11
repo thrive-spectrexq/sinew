@@ -5,6 +5,8 @@
 #include <string>
 #include <string_view>
 #include <utility>
+#include <cstdio>
+#include <sinew/crc.hpp>
 
 #if defined(_WIN32)
 #ifndef WIN32_LEAN_AND_MEAN
@@ -33,9 +35,13 @@ inline std::string normalize_posix_shm_name(std::string_view name) {
         s = std::string(name);
     }
     // macOS limits shm_open names to 31 bytes total (including leading '/').
-    // If the name exceeds 31 characters, truncate and encode length to stay unique and valid.
+    // If the name exceeds 31 characters, keep prefix and append an 8-char CRC hex to ensure uniqueness.
     if (s.length() > 31) {
-        s.resize(31);
+        uint32_t hash = crc32(s.data(), s.length());
+        char hex[9];
+        std::snprintf(hex, sizeof(hex), "%08x", hash);
+        // Prefix of 22 bytes + "_" + 8 hex characters = 31 bytes
+        s = s.substr(0, 22) + "_" + hex;
     }
     return s;
 }
@@ -106,6 +112,7 @@ public:
      *
      * OPERATIONAL CONSTRAINT: If attached consumers are actively reading an existing segment,
      * calling create() on POSIX truncates and resets state, which will orphan consumer cursors.
+     * On Windows, CreateFileMappingA reopens any existing section without truncation.
      * In multi-process production deployments, use create_exclusive() to guarantee that no
      * previous segment is currently active.
      */
@@ -259,6 +266,12 @@ public:
         std::string posix_name = detail::normalize_posix_shm_name(region.name_);
         int fd = shm_open(posix_name.c_str(), O_RDWR, 0660);
         if (fd < 0) {
+            return SharedMemoryRegion{};
+        }
+
+        struct stat st;
+        if (fstat(fd, &st) != 0 || st.st_size < static_cast<off_t>(size)) {
+            ::close(fd);
             return SharedMemoryRegion{};
         }
 

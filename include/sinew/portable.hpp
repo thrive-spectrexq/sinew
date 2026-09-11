@@ -101,11 +101,11 @@ inline void portable_swap(T& val) noexcept {
             portable_swap(field);
         });
     } else if constexpr (detail::is_static_vector_v<T>) {
-        val.size_ = byte_swap(val.size_);
         const uint32_t count = (val.size_ <= T::capacity()) ? val.size_ : T::capacity();
         for (uint32_t i = 0; i < count; ++i) {
             portable_swap(val.data_[i]);
         }
+        val.size_ = byte_swap(val.size_);
     } else if constexpr (detail::is_static_string_v<T>) {
         val.size_ = byte_swap(val.size_);
     } else if constexpr (std::is_fundamental_v<T> || std::is_enum_v<T>) {

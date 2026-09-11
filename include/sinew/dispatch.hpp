@@ -35,7 +35,7 @@ inline ErrorCode inspect_packet(const void* buffer, size_t size, PacketView& out
         return ErrorCode::BadMagic;
     }
 
-    if (size < sizeof(Header) + hdr->payload_len) {
+    if (static_cast<size_t>(hdr->payload_len) > (size - sizeof(Header))) {
         return ErrorCode::BufferTooSmall;
     }
 
@@ -46,6 +46,20 @@ inline ErrorCode inspect_packet(const void* buffer, size_t size, PacketView& out
 }
 
 namespace detail {
+
+template <typename... MsgTypes>
+constexpr bool has_duplicate_message_ids() noexcept {
+    constexpr uint16_t ids[] = { MessageTraits<MsgTypes>::id... };
+    constexpr size_t N = sizeof...(MsgTypes);
+    for (size_t i = 0; i < N; ++i) {
+        for (size_t j = i + 1; j < N; ++j) {
+            if (ids[i] == ids[j]) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 template <typename Msg, typename Visitor>
 inline bool try_dispatch_single(uint16_t msg_id, const void* buffer, size_t size, Visitor&& visitor, bool verify_crc) {
@@ -76,6 +90,9 @@ inline bool try_dispatch_single(uint16_t msg_id, const void* buffer, size_t size
  */
 template <typename... MsgTypes, typename Visitor>
 inline bool dispatch(const void* buffer, size_t size, Visitor&& visitor, bool verify_crc = false) {
+    static_assert(!detail::has_duplicate_message_ids<MsgTypes...>(),
+                  "Sinew dispatch: duplicate Message ID detected in MsgTypes list");
+
     if (buffer == nullptr || size < sizeof(Header)) {
         return false;
     }

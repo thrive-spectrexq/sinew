@@ -36,7 +36,7 @@ TEST_CASE(TestInspectPacket) {
 
     // Test integer overflow craft: huge payload_len that wraps around size
     sinew::Header overflow_hdr{};
-    overflow_hdr.magic = SINEW_MAGIC;
+    overflow_hdr.magic = sinew::SINEW_MAGIC;
     overflow_hdr.payload_len = UINT32_MAX - sizeof(sinew::Header) + 2;
     REQUIRE_EQ(sinew::inspect_packet(&overflow_hdr, sizeof(sinew::Header) + 16, pv_bad),
                sinew::ErrorCode::BufferTooSmall);
